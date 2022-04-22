@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         WordCounter wordCounter = new WordCounter();
-        Folder folder = Folder.fromDirectory(new File("D:\\test1"));
+        Folder folder = Folder.fromDirectory(new File("D:\\test2"));
         String[] searchedWords = new String[]{"класс", "процесс", "void", "поток", "значениями"};
         List<List<String>> resList = wordCounter.countOccurrencesInParallel(folder, searchedWords);
         for(String w: searchedWords) {
@@ -20,7 +20,12 @@ public class Main {
     }
 
     static void showLists(List<List<String>> resList, int l) {
+        resList.sort((List<String> a, List<String> b) ->
+             Integer.compare(b.size(), a.size())
+       );
         for(List<String> list: resList) {
+            if(list.size() == 1)
+                continue;
             for(String s: list) {
                 System.out.print(s + " ");
             }

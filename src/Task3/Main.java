@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         WordCounter wordCounter = new WordCounter();
-        Folder folder = Folder.fromDirectory(new File("D:\\test1"));
+        Folder folder = Folder.fromDirectory(new File("D:\\test2"));
         List<HashSet<String>> myHashSetList = wordCounter.countOccurrencesInParallel(folder);
         System.out.println("Size " + myHashSetList.size());
         HashSet<String> commonWords = findCommonWords(myHashSetList);
@@ -27,8 +27,9 @@ public class Main {
 
     static void showHashSet(HashSet<String> commonWords) {
         for(String word: commonWords) {
-            System.out.println(word);
+            System.out.print(word + "\n");
         }
+        System.out.println();
     }
 }
 
@@ -88,7 +89,8 @@ class Folder {
 }
 
 class WordCounter {
-    int[] infArr = new int[28];
+    int n = 28;
+    int[] infArr = new int[n];
     public  AtomicInteger allNumb = new AtomicInteger(0);
     private final ForkJoinPool forkJoinPool = new ForkJoinPool();
 
@@ -104,7 +106,7 @@ class WordCounter {
         for (String line : document.getLines()) {
             for (String word : wordsIn(line)) {
 
-                if(word.length() -1 >= 0) {
+                if(word.length() -1 >= 0 && word.length() < n + 1) {
                     infArr[word.length() -1]++;
                     allNumb.incrementAndGet();
                     myHashSet.add(word);

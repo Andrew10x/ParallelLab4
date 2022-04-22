@@ -9,10 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,11 +20,10 @@ public class Main {
         start = System.currentTimeMillis();
         WordCounter wordCounter = new WordCounter();
         Folder folder = Folder.fromDirectory(new File("D:\\test2"));
-        //System.out.println(wordCounter.countOccurrencesOnSingleThread(folder, "void"));
+        System.out.println(wordCounter.countOccurrencesOnSingleThread(folder, "void"));
         System.out.println(wordCounter.countOccurrencesInParallel(folder, "класс"));
         end = System.currentTimeMillis();
         System.out.println("Time " + (end - start));
-        wordCounter.showAllInf();
     }
 }
 
@@ -75,7 +71,7 @@ class Folder {
     static Folder fromDirectory(File dir) throws IOException {
         List<Document> documents = new LinkedList<>();
         List<Folder> subFolders = new LinkedList<>();
-        for (File entry : dir.listFiles()) {
+        for (File entry : Objects.requireNonNull(dir.listFiles())) {
             if (entry.isDirectory()) {
                 subFolders.add(Folder.fromDirectory(entry));
             } else {
@@ -87,14 +83,7 @@ class Folder {
 }
 
 class WordCounter {
-    int[] infArr = new int[28];
-    public  AtomicInteger allNumb = new AtomicInteger(0);
     private final ForkJoinPool forkJoinPool = new ForkJoinPool();
-
-    public WordCounter() {
-        inArr();
-    }
-
 
     Long countOccurrencesInParallel(Folder folder, String searchedWord) {
         return forkJoinPool.invoke(new FolderSearchTask(folder, searchedWord));
@@ -103,59 +92,12 @@ class WordCounter {
         return line.trim().split("(\\s|\\p{Punct})+");
     }
 
-    void inArr() {
-        Arrays.fill(infArr, 0);
-    }
-    public void showInFArr() {
-        for(int i=0; i<infArr.length; i++){
-            System.out.println(i+1 + " - " + infArr[i]);
-        }
-    }
-
-    public void showAllInf() {
-        System.out.println("Words: " + allNumb);
-        System.out.println("M = " + calcM());
-        System.out.println("D = " + calcDisp());
-        System.out.println("Q = " + Math.sqrt(calcDisp()));
-        showInFArr();
-    }
-
-    public double calcM() {
-        double m = 0;
-        double sum = 0;
-        for(int i=0; i<infArr.length; i++){
-            sum += (i+1)*infArr[i];
-        }
-
-        m = sum/allNumb.get();
-        return m;
-    }
-    public double calc2M() {
-        double m = 0;
-        double sum = 0;
-        for(int i=0; i<infArr.length; i++){
-            sum += Math.pow((i+1), 2)*infArr[i];
-        }
-
-        m = sum/allNumb.get();
-        return m;
-    }
-
-    public double calcDisp() {
-        double disp =  calc2M() - Math.pow(calcM(), 2);
-        return disp;
-     }
 
 
     Long occurrencesCount(Document document, String searchedWord) {
         long count = 0;
         for (String line : document.getLines()) {
             for (String word : wordsIn(line)) {
-
-                if(word.length() -1 >= 0) {
-                    infArr[word.length() -1]++;
-                    allNumb.incrementAndGet();
-                }
 
                 if (searchedWord.equals(word)) {
                     count = count + 1;
